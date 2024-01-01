@@ -1,0 +1,69 @@
+
+Application.properties:
+- spring.datasource.url = jdbc:mysql://localhost:3306/salesV3?useSSL=false --> useSSL = false removes errors associated with the spring security dependency
+- spring.main.allow-circular-reference= true --> included to assist with Spring security
+
+WebSecurityConfig:
+
+-- Code removed, that wasn't working:
+			
+			----- Version 1 (the OG) -----
+			
+			@Configuration
+			public class WebSecurityConfiguration extends WebSecurityConfigurerAdapter {
+  
+ 			@Autowired
+			private UserDetailsService userDetailsService;
+
+ 			@Bean
+ 			public PasswordEncoder getPasswordEncoder() {
+			return new BCryptPasswordEncoder();
+  }
+  
+			  @Override
+			  protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+			  auth
+		      .userDetailsService(userDetailsService)
+		      .passwordEncoder(getPasswordEncoder());
+		        
+				//    --Commented Out in the "working" version --
+				//auth.inMemoryAuthentication()
+				//        .passwordEncoder(getPasswordEncoder())
+				//        .withUser("trevor@craftycodr.com")
+				//        .password(getPasswordEncoder().encode("asdfasdf"))
+				//        .roles("USER");
+  }
+  
+			  @Override
+			  protected void configure(HttpSecurity http) throws Exception {
+			    http
+			        .authorizeRequests()
+			          .antMatchers("/").permitAll()
+			          .anyRequest().hasRole("USER").and()
+			        .formLogin()
+			          .loginPage("/login")
+			          .defaultSuccessUrl("/dashboard")
+			          .permitAll()
+			          .and()
+			        .logout()
+			          .logoutUrl("/logout")
+			          .permitAll();
+  }
+}
+
+
+			----- Version 2 (Trial & Error) -----
+
+
+
+				public InMemoryUserDetailsManager userDetailsManager() {
+				
+				UserDetails Dennis = User.builder()
+						.username("Dennis")
+						.password("asdfasdf")
+						.roles("USER")
+						.build();
+				
+				return new InMemoryUserDetailsManager(Dennis);
+						
+}
